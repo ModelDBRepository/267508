@@ -1,0 +1,104 @@
+ //KIR
+objref vecmtau_KIR, vecv_KIR
+vecmtau_KIR = new Vector()
+vecv_KIR = new Vector()
+vecv_KIR.indgen(-120, 0, 10)
+//vecmtau_KIR.append(14.93, 14.93, 14.93, 16.00, 18.87, 21.51, 24.24, 27.59, 30.77, 28.57, 23.53, 17.78, 16.00) // As per table
+vecmtau_KIR.append(7.465, 7.465, 7.465, 8, 9.435, 10.755, 12.12, 13.795, 15.385, 14.285, 11.765, 8.89, 8) // At 35 deg C
+//vecmtau_KIR.append(22.395, 22.395, 22.395, 24, 28.305, 32.265, 36.36, 41.385, 46.155, 42.855, 35.295,26.67,24) // at 25 deg C
+
+//vecmtau_KIR.mul(3) //To compensate for temperature correction
+table_tabmtau_KIR(&vecmtau_KIR.x[0], vecv_KIR.size, &vecv_KIR.x[0]) 
+
+//inKIR
+
+objref vecv_inKIR, vechinf_inKIR, vechtau_inKIR, vecv_tau_inKIR
+
+vecv_tau_inKIR = new Vector()
+vechtau_inKIR= new Vector()
+vecv_tau_inKIR.append(-120,-90, -50)
+//vechtau_inKIR.append(23.3, 45, 76) // At 25 deg C
+vechtau_inKIR.append(7.767, 15, 25.333) // At 35 deg C
+table_tabhtau_inKIR(&vechtau_inKIR.x[0],vecv_tau_inKIR.size, &vecv_tau_inKIR.x[0])
+
+vecv_inKIR = new Vector()
+vechinf_inKIR = new Vector()
+vecv_inKIR.append(-120,-90, -50)
+//vechinf_inKIR.append(0.53, 0.59, 1)
+vechinf_inKIR.append(0, 0.13, 1)
+table_tabhinf_inKIR(&vechinf_inKIR.x[0], vecv_inKIR.size, &vecv_inKIR.x[0])
+table_tabmtau_inKIR(&vecmtau_KIR.x[0], vecv_KIR.size, &vecv_KIR.x[0]) 
+
+//KRP
+
+objref vecv_KRP, vecmtau_KRP, vechtau_KRP
+vecv_KRP = new Vector()
+vecv_KRP.indgen(-100, 50, 5)
+
+vecmtau_KRP = new Vector()
+vecmtau_KRP.append(13.33, 15, 16.27, 18.33, 21.47, 25, 27.97, 30, 31.17, 31.67, 31.8, 32.33, 33.07, 31.67, 26.57, 20, 14.83, 11.67, 9.77, 8.33, 6.67, 5, 3.87, 3.33, 3.2, 3.33, 3.5, 3.33, 2.67, 1.67, 1.67)
+table_tabmtau_KRP(&vecmtau_KRP.x[0], vecv_KRP.size, &vecv_KRP.x[0])
+
+vechtau_KRP = new Vector()
+vechtau_KRP.append(2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2333.33,2247.5,2000,1580.07,1166.67,927.77,833.33,778.77,733.33,694.5,666.67,666.67)
+table_tabhtau_KRP(&vechtau_KRP.x[0], vecv_KRP.size, &vecv_KRP.x[0])
+
+//NaF
+//~ objref vecv_NaF, vecmtau_NaF, vechtau_NaF
+//~ vecv_NaF = new Vector()
+//~ vecv_NaF.indgen(-80, 30, 10)
+
+//~ vecmtau_NaF = new Vector()
+//~ vecmtau_NaF.append(0.023,0.03,0.037,0.043,0.067,0.107,0.053,0.05,0.04,0.027,0.02,0.02)
+//~ table_tabmtau_NaF(&vecmtau_NaF.x[0], vecv_NaF.size, &vecv_NaF.x[0])
+
+//~ vechtau_NaF = new Vector()
+//~ vechtau_NaF.append(0.433,0.433,0.433,0.433,0.433,0.433,0.283,0.167,0.15,0.107,0.1,0.093)
+//~ table_tabhtau_NaF(&vechtau_NaF.x[0], vecv_NaF.size, &vecv_NaF.x[0])
+
+objref vecv_NaF, vecmtau_NaF, vechtau_NaF
+vecv_NaF = new Vector()
+vecv_NaF.indgen(-90, 30, 10)
+
+vecmtau_NaF = new Vector()
+vecmtau_NaF.append(0.02,0.023,0.03,0.037,0.043,0.067,0.107,0.053,0.05,0.04,0.027,0.02,0.02)
+table_tabmtau_NaF(&vecmtau_NaF.x[0], vecv_NaF.size, &vecv_NaF.x[0])
+
+vechtau_NaF = new Vector()
+vechtau_NaF.append(0.433,0.433,0.433,0.433,0.433,0.433,0.433,0.283,0.167,0.15,0.107,0.1,0.093)
+table_tabhtau_NaF(&vechtau_NaF.x[0], vecv_NaF.size, &vecv_NaF.x[0])
+
+//CaT
+objref vecv_CaT, vecmtau_CaT, vechtau_CaT
+vecv_CaT = new Vector()
+vecv_CaT.indgen(-65, 10, 5)
+
+vecmtau_CaT = new Vector()
+vecmtau_CaT.append(6.73,6.73,4.37,2.9,2.27,1.87,1.47,1.27,1.2,1.1,1.2,1.2,1.1,1.1,1.1,1.1)
+table_tabmtau_CaT(&vecmtau_CaT.x[0], vecv_CaT.size, &vecv_CaT.x[0])
+
+vechtau_CaT = new Vector()
+vechtau_CaT.append(127.33,69.33,54,43,39.67,35.67,35.67,35.67,36,36.33,36.33,36.67,36.67,36.67,36.67,36.67)
+//~ vechtau_CaT.append(127.33,39.67,39.67,39.67,39.67,35.67,35.67,35.67,36,36.33,36.33,36.67,36.67,36.67,36.67,36.67)
+table_tabhtau_CaT(&vechtau_CaT.x[0], vecv_CaT.size, &vecv_CaT.x[0])
+
+//CaR
+objref vecv_CaR, vechtau_CaR
+vecv_CaR = new Vector()
+vecv_CaR.indgen(-30, 10, 10)
+
+vechtau_CaR = new Vector()
+vechtau_CaR.append(33.33,21.67,11.67,10.00,6.67)
+table_tabhtau_CaR(&vechtau_CaR.x[0], vecv_CaR.size, &vecv_CaR.x[0])
+
+//temp
+
+//NaP
+objref vecv_NaP, vechtau_NaP
+vecv_NaP = new Vector()
+vecv_NaP.indgen(-100, 10, 10)
+
+vechtau_NaP = new Vector()
+vechtau_NaP.append(1500, 1583.33, 1733.33, 2033.33, 2100, 1666.67, 1416.67, 1166.67, 1000, 900, 833.33, 700)
+//~ vechtau_NaP.append(1500, 1583.33, 1733.33, 2033.33, 1416.67, 1416.67, 1416.67, 1166.67, 1000, 900, 833.33, 700)
+table_tabhtau_NaP(&vechtau_NaP.x[0], vecv_NaP.size, &vecv_NaP.x[0])

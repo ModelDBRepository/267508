@@ -1,0 +1,98 @@
+// This hoc file contains the definitions of the customized GUI. This is inserted in the main.hoc file. 
+
+objref outerbox, strfnc
+strfnc = new StringFunctions()
+proc MyHelp() {localobj fHlp
+        strdef szHlp, tmpstr
+        fHlp = new File("support_files/Help.txt")
+        fHlp.ropen()
+        outerbox=new VBox()
+        outerbox.intercept(1)
+          xpanel("Help")
+          while(fHlp.gets(szHlp)!=-1) {
+            strfnc.head(szHlp, "\n", tmpstr)
+            xlabel(tmpstr)
+          }
+          xpanel(1)
+        outerbox.intercept(0)
+        outerbox.map("Help",100,50,500,600)
+}
+
+objref box
+proc CtrlPanel() {
+	printf("Creating Control Panel...\n")
+	box = new HBox()
+	box.intercept(1)
+	xpanel("Control Panel")
+	xlabel("CELL PROPERTIES")
+	xlabel("")
+	xlabel("KIR Channel Variant")
+	strOutFile = "support_files/Output.txt"
+	xradiobutton("Non-inKIR", "eKir=0 InsertKIR(eKir)", 1)
+	xradiobutton("inKIR", "eKir=1 InsertKIR(eKir) a_inKIR=0.47")
+
+	xlabel("")
+	xlabel("DA Receptor Variant")
+	xradiobutton("D1", "DRChange(1)", 1)
+	xradiobutton("D2", "DRChange(2)")
+
+	xlabel("")
+	xlabel("DA Modulation Setting")
+	xradiobutton("No modulation","DModChange(0)", 1)
+	xradiobutton("Intrinsic","DModChange(1)")
+	xradiobutton("Intrinsic-Synaptic","DModChange(2)")
+
+	xlabel("")
+	xlabel("INPUT")
+
+	xlabel("Options for current pulse stimulation:")
+	xpvalue("del   ", &stim.del, 1)                 
+	xpvalue("amp  ", &stim.amp, 1, "if (bSynput) {bSynput=0 stimChange(0)}")                     
+	xpvalue("dur   ", &stim.dur, 1)
+		  
+
+	xlabel("---")
+	xstatebutton("Synaptic input", &bSynput, "stimChange(bSynput)")
+	xlabel("Options for synaptic stimulation:")
+	xpvalue("Frequency (Hz) ", &Upf, 1)
+	xpvalue("Random seed   ", &seed, 1)
+
+
+	xpanel(0)
+
+	xpanel("Control Panel")
+	xlabel("ACTION")
+	xradiobutton("Run", "eAct=0", !eAct)
+	xradiobutton("Range Run", "eAct=9")
+
+	xlabel("OPTIONS FOR RANGE RUN:")
+	xlabel("The values of min and max below represent")
+	xlabel("the range of current pulse amplitude (nA) or")
+	xlabel("the range of Up-state frequency (Hz),")
+	xlabel("depending on the INPUT setting.")
+	xpvalue("min", &min, 1)
+	xpvalue("max", &max, 1)
+	xpvalue("iterations", &iterations, 1)
+
+	xlabel("")
+	xlabel("RUN INFO")
+	xpvalue("       t       ", &t)
+	xpvalue("Real Time  ", &realtime)
+	xpvalue("      Run No.     ", &RunNo)
+	xpvalue("Total Time (m)", &total_time)
+	
+	xlabel("")
+	xlabel("RUN")
+	xbutton("Save to...", "string_dialog(\"Save To\", strOutFile)")
+	xbutton("START", "Exec()")
+	xbutton("QUIT", "MyQuit()")
+	xbutton("Help", "MyHelp()")
+	xpanel(0)
+	
+	oTxt = new TextEditor()
+	oTxt.readonly(1)
+	oTxt.map()
+	box.intercept(0)
+	printf("Control Panel created.\n")
+	box.map("Control Panel", 20, 80, -1, -1)
+}

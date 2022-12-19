@@ -1,0 +1,91 @@
+old_amp = stim.amp // to store the last value of stim.amp
+proc stimChange() {
+	if (!$1) { 
+		printf("\nStimulation type changed to Current Pulse\n") 
+		stim.amp = old_amp
+	} else {
+		old_amp = stim.amp	
+		stim.amp = 0
+		printf("\nStimulation type changed to Synaptic Input\n")
+	}
+}
+
+
+proc loadqueue(){
+	if(!bSynput) return
+	UniformRand = new Random(seed)
+	NormRand = new Random(seed)
+	
+	for i = 0, 250{
+		Events(Dnf)
+		Events(Upf)
+		if(i>83) i+=1	
+	}
+}
+
+proc Events() {local start, Event // See explanation for this proc torwards the end of this file
+	start = UniformRand.uniform(0, 1000/$1)
+	Event = start + NormRand.normal(0, 1e6/(16*$1*$1))
+	for j=1, 3+int(StateNo*SI*$1/1000) { //3 is for generating some extra spikes as a safety margin 
+		if(Event>=0) {
+			if((abs((int(int(Event/SI)/2)==(int(Event/SI)/2))-($1==Upf)))){
+				ns.o[i].event(Event)
+				if(i>83){ns.o[i+1].event(Event)}
+			}
+		}
+		Event = start + 1000 * j/$1 + NormRand.repick()
+	}
+}
+
+
+
+
+
+/* EXPLANATION FOR THE Events proc follows:
+
+//~ which can be rewritten as the following proc. This proc while same as the original proc will be easier to explain.
+//~ The spike train that is input to each receptor has 7 parts - 3 up-state parts & 4 down-state parts. In the down-state
+//~ parts, the frequency of the spike train should be 3Hz and in the up-state parts it should be 7.5 Hz. When Events(Dnf) is
+//~ called for a given receptor, a spike train with spikes corresponding only to the 4 down-states is delivered to Netcon  (no spikes for the up-state is delivered).  __|_____|_____________|___|_______________|___|____________|____|__
+//~ Similarly when Events(Upf) is called for the same receptor, another spike train with spikes
+//~ corresponding to the up-state is delivered to the Netcon.                                                                                                                                             ____________|_|__|_|_____________|_|_|__|_____________|_|_|_|________
+//~ Thus the actual spike train for a given receptor delivered to its Netcon will be the combination of the Events(Dnf) and Events(Upf) spike trains.                   __|_____|____|_|__|_|___|___|___ __|_|_|__|___|___|______|_|_|_|________
+
+//~ The steps to achieve this is explained inline within the program code below
+
+
+proc Events() {local start, Event
+	Statef = $1 //Specifies whether the proc should generate and deliver to Netcon an up-state spike train or down-state spike train. 
+	start = UniformRand.uniform(0, 1000/Statef) //To decide the first occurence of the spike in the spike train, define a variable 'start'. Draw the value of start from a uniform random distribution within the range 0 and inter-spike interval of Dn or Up state spike train
+	Event = start + NormRand.normal(0, 1e6/(16*Statef*Statef)) //Generate the first spike of the spike train by adding a value to 'start' drawn from a normal dist (See Wolf et al for details)
+	for j=1, 3+int(StateNo*SI*Statef/1000) { //Generate the reqd no. of spikes for the up or dn spike train. Add 3 extra spikes for a safety margin 
+		if(Event>=0) { //If the generated spike (Event) is non-negative
+			
+			if(Statef==Upf) { //Determine if up or dn state spike train is to be generated.
+				bUpf = 1
+			} else {
+				bUpf = 0
+			}
+						
+			if((eAct==0)||(eAct==9)) { //For 'Run' & 'Range Run'
+				
+				StateID = int(Event/SI)/2 // A full spike train having up & dn states has 7 parts with each part having the duration of SI (e.g. 284 ms). If the generated Event falls within the 1st part, StateID will be assigned a value of 0, for the second part, 0.5, third part 1 and so on upto 3 for the 7th part.
+				
+				if(int(StateID)==StateID) { //If StateID is a whole no., the generated Event falls in the dn state, else it is in the up-state
+					bIsDnState = 1
+				} else {
+					bIsDnState = 0
+				}
+				
+				if(abs(bIsDnState-bUpf)){ // If Dn-state spike train is requested, eliminate generated Events that fall in the up-state and deliver the remaining to Netcon. Similarly if Up-state train is requested, eliminate generated Events that fall in dn-state and deliver remaining to Netcon.
+					ns.o[i].event(Event)
+					if(i>83){ns.o[i+1].event(Event)} 
+				}
+			} else { // for all other values of eAct
+				if (abs((Event<stim.del)-bUpf)) {
+					ns.o[i].event(Event)
+					if(i>83){ns.o[i+1].event(Event)}
+				}
+			}		
+		}
+		Event = start + 1000 * j/Statef + NormRand.repick() //Generate the next Event

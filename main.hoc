@@ -1,0 +1,122 @@
+load_file("MSPcell.hoc")
+load_file("grapher.hoc")
+
+eKir = 0
+
+eDR = 1 //Dopamine receptor type
+eMod = 0 // DA modulation type
+
+bSynput = 0 // Input type. 0 for current inject, 1 for synaptic input
+
+eAct = 0
+celsius = 35
+Dnf = 3 + 1e-11 // Due to implementation limitation, Also Dnf and Upf should differ at least by 0.00000000001.
+Upf = 7.5
+SI = 284 //Switching Interval
+StateNo = 7
+min = 0.2
+max = 0.29
+iterations = 1
+total_time = 0
+RunNo = 0
+seed = 0
+scrpos = 590
+
+objectvar stim, nc, ns, vgraph, fih, NormRand, UniformRand, apc,   null, fInstChk, oTxt  
+
+strdef strOutFile
+
+load_file("GUI.hoc") // Loading the GUI here. Any changes in the GUI, need to edit GUI.hoc file. 
+
+
+
+proc MyQuit() {
+	if(bInstChk) {fInstChk.wopen()}else {fInstChk.unlink()}
+	quit()
+}
+
+
+objref vecAPC, vec_nAP, vec_Step
+proc ProgInit() {
+	printf("Setting up input providers...\n")
+	ns = new List()
+	stim = new IClamp(0.5)
+	apc = new APCount(0.5)
+	vecAPC = new Vector()
+	apc.record(vecAPC)
+
+	vec_nAP = new Vector() // This is to store the count of AP in each iteration. 
+	vec_Step = new Vector() // This is to store the step values during RangeRun() execution
+
+	stim.del = 300
+	stim.dur = 500
+	stim.amp = 0.248
+	fInstChk = new File("support_files/Instchk.dat")
+	if(!bInstChk = fInstChk.ropen()) fInstChk.wopen()
+	fInstChk.close()
+	if(bInstChk)fInstChk.unlink()
+	printf("Program Instance %d\n", bInstChk+1)
+	vgraph = new Graph(0)
+	vgraph.view(0,0,0,0, 680, 60, 645, 250)
+	graphList[0].append(vgraph)
+	vgraph.addexpr("Soma Voltage", "cell_soma.v(0.5)", 3, 2, 0.7, 0.9, 2)
+	fih = new FInitializeHandler("loadqueue()")
+	cvode.active(1)
+}
+
+proc ActivateInput() {
+	if(!bSynput) {
+		printf("Activating current injection input...\n")
+		ns.remove_all()
+		tstop = stim.del+stim.dur+200
+	}else {
+		printf("Activating synaptic input...\n")
+
+		for i = 0, 83 {
+			ns.append(new NetCon(null, ncl_GABA.o[i], 10, 1, 1))
+		}
+
+		for i = 84, 167 {
+			ns.append(new NetCon(null, ncl_AMPA.o[i-84], 10, 1, 1))
+			ns.append(new NetCon(null, ncl_NMDA.o[i-84], 10, 1, 1))
+		}
+
+		tstop = StateNo * SI
+	}
+
+	printf("Input activated...\n")
+}
+
+proc Exec(){local i
+	RunNo = 0
+	total_time = 0
+	ActivateInput()
+	for i=0, graphList[0].count()-1 {graphList[0].o[i].size(200,tstop,graphList[0].o[i].size(3),graphList[0].o[i].size(4))}
+	if(!eAct) {Batch_Run()
+	} else if(eAct==9) {RangeRun()}
+	generateSummary()
+	vec_nAP.resize(0) // Clearing the vector to get ready for the next simulation, if any. 
+	vec_Step.resize(0) // Same with vec_Step
+}
+
+
+func Rnd() {local n
+	n=10^$3
+	return int(n*$1+0.99999*$2)/n
+}
+
+func Run(){
+	RunNo+=1
+	run()
+	total_time+=realtime/60
+	if(!bSynput)vecAPC.sub(stim.del)
+	return !stoprun
+}
+
+CreateCell()
+access cell_soma
+ProgInit()
+ActivateInput()
+CtrlPanel()
+load_file("stim.hoc")
+load_file("Actions.hoc")

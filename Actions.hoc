@@ -1,0 +1,254 @@
+// Function to create a summary file
+objref mSpkTmng
+objref fSummary
+objref vec_ot
+strdef val
+objref fOutput
+proc generateSummary() {  
+	vec_ot = new Vector()
+	fSummary = new File("Summary.txt")
+	fSummary.wopen()
+	
+	fSummary.printf("---------------------\n")
+	fSummary.printf("Summary of Simulation\n")
+	fSummary.printf("---------------------\n\n")
+	
+
+	// Cell Properties
+	fSummary.printf("MSN Cell Properties:\n")
+	fSummary.printf("-------------\n")
+	if (eKir) {val = "inKIR"} else { val = "non-inKIR"}
+	fSummary.printf("KIR Channel = %s\n", val )
+	if (eDR == 1) {val = "D1"} else { val = "D2"}
+	fSummary.printf("DA Receptor = %s\n", val)
+	if (eMod) { 
+		if (eMod == 1) {val = "Intrinsic"} else { val = "Intrinsic-Synaptic"} 
+	} else { val = "No Modulation" }
+	fSummary.printf("DA Modulation = %s\n", val)
+
+	// Input Type
+	fSummary.printf("\nInput Settings:\n")
+	fSummary.printf("-------------\n")
+	if (bSynput) {
+		fSummary.printf("Input Type = Synaptic Stimulation\n")
+		fSummary.printf("Down-State Frequency = 3 Hz\n")
+		if (!eAct) {
+			fSummary.printf("Up-State Frequency = %0.2f Hz\n", Upf)
+			if (iterations == 1) { 
+				fSummary.printf("Random seed = %d\n", seed) 
+			} else { 
+				fSummary.printf("Random seed = varied across iterations (see below in RESULTS)\n")
+			}
+		} else {
+			fSummary.printf("Up-State Frequency = Varied between %0.2f Hz and %0.2f Hz in %d steps\n", min, max, iterations)
+		}
+	} else { 
+		fSummary.printf("Input Type = Current Pulse\n")
+		fSummary.printf("Delay = %0.1f ms\n", stim.del)
+		if (!eAct) {
+			fSummary.printf("Amplitude = %0.3f nA\n", stim.amp)
+		} else {
+			fSummary.printf("Amplitude = Varied between %0.3f nA and %0.3f nA in %d steps\n", min, max, iterations)
+		}
+		fSummary.printf("Duration = %0.1f ms\n", stim.dur)
+	}
+	
+	// Action-Summary
+	fSummary.printf("\nACTION and RESULTS\n")
+	fSummary.printf("------------------\n")
+	if (!eAct) {
+		if (iterations == 1) {
+			fSummary.printf("Action = Single Run\n")
+			fSummary.printf("Spike count = %d\n", apc.n)
+			fSummary.printf("Spike Instances:\n")
+			for i = 0, apc.n -1 {
+				fSummary.printf("%0.1f\t", vecAPC.x[i])
+			}
+		} else {
+			fSummary.printf("Action = Multiple Runs\n")
+			if (!bSynput) {
+				fSummary.printf("No. of iterations = %d (Pointless, actually. Current pulse remains the same in all iterations. Did you intend to do Range Run?)\n", iterations)
+				fSummary.printf("Spike Count = %d\n", apc.n)
+				fSummary.printf("\nSpike Timings in ms (All rows identical, so only one is shown):\n")
+				for i = 0, apc.n -1 {
+					if (vec_nAP.x[i] == 0) {
+						fSummary.printf("-")
+					}
+					fSummary.printf("%0.1f\t", vecAPC.x[i])
+				}
+			} else{
+				fSummary.printf("No. of iterations = %d\n", iterations)
+				// So there are three up-states. Finding the average count divided by 3 to get no. of spikes per up-state
+				nAP_ups = vec_nAP.mean() / 3.0
+				nAP_upstd = vec_nAP.stdev() /3.0
+				nAP_upsem = nAP_upstd / sqrt( iterations ) 
+				fSummary.printf("\nNo. of Spikes per Up-state:\n")
+				fSummary.printf("Mean\t= %0.1f\n", nAP_ups)
+				fSummary.printf("SD\t= %0.1f\n", nAP_upstd)
+				fSummary.printf("SEM\t= %0.1f\n", nAP_upsem)
+				// Spike frequency is spike number divided by time of up-state (That is switching interval stored in variable SI)
+				fSummary.printf("\nSpike Frequency:\n")
+				fSummary.printf("Mean\t= %0.1f Hz\n", 1e3*nAP_ups/SI)
+				fSummary.printf("SD\t= %0.1f Hz\n", 1e3*nAP_upstd/SI)
+				fSummary.printf("SEM\t= %0.1f Hz\n", 1e3*nAP_upsem/SI)
+				// Calculating and showing the mean and SD of spike onset times 
+				for i = 0, iterations - 1 {
+					if (vec_nAP.x[i] > 0) {vec_ot.append( mSpkTmng.x[i][0] ) } // Storing the instance of first spike
+				}
+				fSummary.printf("\nSpike Onset Time:\n")
+				fSummary.printf("Mean\t= %0.1f ms\n", vec_ot.mean() - SI)
+				fSummary.printf("SD\t= %0.1f ms\n", vec_ot.stdev() )
+				fSummary.printf("SEM\t= %0.1f ms\n", vec_ot.stdev() / sqrt(iterations))
+				vec_ot.resize(0) // clearing the values after the use. 
+
+				//Printing the seeds used
+				fSummary.printf("\nRandom seeds used (And the corresponding AP counts in brackets): \n")
+				
+				for i = seed - iterations + 1, seed {
+					j = i - (seed - iterations + 1)
+					fSummary.printf("%d (%d);  ", i, vec_nAP.x[j])
+				}
+				
+				fSummary.printf("\n\nAP instances (in ms) observed during each iteration:\n")
+				for i = 0, iterations - 1 {
+					if (vec_nAP.x[i] == 0) {
+						fSummary.printf("-")
+					}
+					for j = 0, vec_nAP.x[i] - 1 {
+						fSummary.printf("%0.1f\t", mSpkTmng.x[i][j])
+					}
+					fSummary.printf("\n")
+				} 
+			}
+
+		}
+	} else {
+		fSummary.printf("Action = Range Run\n")
+		if (!bSynput) {
+			fSummary.printf("Min stim.amp = %0.3f nA\n", min)
+			fSummary.printf("Max stim.amp = %0.3f nA\n", max)
+			fSummary.printf("No. of steps = %d\n", iterations)
+			fSummary.printf("\nA summary of the spike frequency (also the number of spikes) for each step of IClamp amplitude is given below:\n")
+			fSummary.printf("-----------------------------\n")
+			fSummary.printf("Iter.\tIC(nA)\tSF(Hz)\tAPcount\n")
+			for i = 0, iterations - 1 {
+				f = 1e3 * vec_nAP.x[i] / stim.dur
+				fSummary.printf("%d\t%0.3f\t%0.1f\t%d\n", i+1, vec_Step.x[i], f, vec_nAP.x[i])
+			}
+			fSummary.printf("\nSpike instances (in ms) observed during each iteration:\n")
+			for i = 0, iterations - 1 {
+				if (vec_nAP.x[i] == 0) {
+					fSummary.printf("-")
+				}
+				for j = 0, vec_nAP.x[i] - 1 {
+					fSummary.printf("%0.1f\t", mSpkTmng.x[i][j])
+				}
+				fSummary.printf("\n")
+			}
+
+		} else {
+			fSummary.printf("Min Up-state Freq. = %0.2f Hz\n", min)
+			fSummary.printf("Max Up-state Freq. = %0.2f Hz\n", max)
+			fSummary.printf("Random seed used = %d for all steps\n", seed)
+			fSummary.printf("No. of steps = %d\n", iterations)
+			fSummary.printf("\nA summary of the spike frequency for each step of Up-state frequency (also the total number of spikes) is given below:\n")
+			fSummary.printf("-----------------------------\n")
+			fSummary.printf("Iter.\tUpF(Hz)\tSF(Hz)\tAPCount\n")
+			for i = 0, iterations - 1 {
+				f = 1e3 * vec_nAP.x[i] / SI / 3
+				fSummary.printf("%d\t%0.2f\t%0.1f\t%d\n", i+1, vec_Step.x[i], f, vec_nAP.x[i])
+			}
+			fSummary.printf("\nSpike instances (in ms) observed during each iteration:\n")
+			for i = 0, iterations - 1 {
+				if (vec_nAP.x[i] == 0) {
+					fSummary.printf("-")
+				}
+				for j = 0, vec_nAP.x[i] - 1 {
+					fSummary.printf("%0.1f\t", mSpkTmng.x[i][j])
+				}
+				fSummary.printf("\n")
+			}
+		
+		}
+		
+	}
+
+	fSummary.close()
+
+	// Writing a copy to the user-desired output file
+	fSummary = new File("Summary.txt")
+	fSummary.ropen()
+	
+	fOutput = new File(strOutFile)
+	fOutput.wopen()
+	while (!fSummary.eof()) {
+		fSummary.gets(val) 
+		fOutput.printf( "%s", val) 
+	}
+	fOutput.close()
+	fSummary.close()
+
+	printf("\nSimulation Complete\n")
+	printf("Summary File is Updated\n")
+	printf("Copy of Summary is kept in file: %s\n--------\n\n", strOutFile)
+}
+
+
+strdef szTxt 
+proc Batch_Run() {local idx, n
+	printf ("\nRUN\n")
+	mSpkTmng = new Matrix(iterations, StateNo*4)
+	vgraph.size(0, tstop, -80, 40)
+	szTxt = "Spike Timings\n"
+
+	for idx = 1, iterations {
+		 if(bSynput && idx>1) seed+=1
+		if(!Run()) break
+		printf("\nDur = %d, Spike timings: ", stim.dur)
+		vecAPC.printf("%.0f, ")
+		printf("\n")
+		for n = 0, vecAPC.size()-1 {sprint(szTxt, "%s%d) %.2f ms\n", szTxt, n+1, vecAPC.x[n])}		
+		oTxt.text(szTxt)		
+		mSpkTmng.setrow(idx-1, vecAPC)		
+		vec_nAP.append( apc.n )
+	}
+
+}
+
+
+proc RangeRun() { 
+	printf ("\nRANGE RUN\n")
+	vgraph.size(0, tstop, -80, 40)
+	if(iterations<1) return
+	mSpkTmng = new Matrix(iterations, StateNo*4)
+	if(iterations==1) {interval = max-min+1
+	}else {interval = (max-min)/(iterations-1)}
+	szTxt = "\nNo of spikes"	
+	if(bSynput){
+		idx = 0
+		for (Upf=min; Upf<=max; Upf+=interval){	
+			if(!Run()) break
+			printf("\nUpf=%f, AP Count =%d\n", Upf, apc.n)
+			sprint(szTxt, "%s\n%d", szTxt, apc.n)
+
+			mSpkTmng.setrow(idx, vecAPC)
+			vec_nAP.append( apc.n )
+			vec_Step.append( Upf )
+			idx += 1
+		}	
+	} else {
+		idx = 0
+		for (stim.amp=min; stim.amp<=max; stim.amp+=interval){	
+			if(!Run()) break
+			printf("\nCurrent=%.2f, AP Count =%d\n", stim.amp, apc.n)
+			sprint(szTxt, "%s\n%d", szTxt, apc.n)
+
+			mSpkTmng.setrow(idx, vecAPC)
+			vec_nAP.append( apc.n )
+			vec_Step.append( stim.amp ) 
+			idx += 1
+		}
+	}
+	printf(szTxt)
+}
+

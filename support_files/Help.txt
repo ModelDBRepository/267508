@@ -1,0 +1,219 @@
+INTRODUCTION
+
+This application implements the model described in Steephen, J. E. (2009).
+Excitability range of medium spiny neurons widens through the combined
+effects of inward rectifying potassium current inactivation and dopaminergic
+modulation. Neurocomputing, 74.18 (2011): 3884-3897 
+
+This help window provides instructions for replicating the results in
+the paper. The information in this window is available in the text
+file 'Help.txt' within the 'support_files' folder. If required, it
+could be printed for easy reference. Launching the program (main.hoc)
+invokes 4 windows: NEURON Main Menu, Command Window (nrniv), the
+Control Panel and a Graph Window. Note that the Control Panel is
+organized into 3 vertical panels. The instructions given below for
+each figure assume that the application is in its default settings. It
+is recommended that the application be restarted after each simulation
+as it would reset all parameters to their default values. Note that
+you may have to right click the graph panel and select View...>View=plot 
+to view some of the plots. 
+
+For questions and queries, send e-mail to john.steephen@duk.ac.in.
+
+THE SUMMARY FILE
+
+In the project folder, you will find a text file named Summary.txt. 
+This file contains the summary of the last completed simulation protocol. 
+This summary file is updated at the end of every simulation. If multiple
+simulations were conduced during one session, only the summary of last 
+simulation procedure is maintained. Note that one simulation protocol 
+might contain multiple iteration of cell-stimulation, each time varying
+a setting, as required by the protocol. Thus, one instance of simulation 
+protocol is started when the "START" button is pressed and finished when
+the message "Summary.txt Updated" is shown in the Command Window.
+The Summary file is not updated if the user press the "STOP" button to 
+abort the simulation protocol. 
+
+A copy of the Summary.txt is also created at the end of each simulation.
+By default, this file is kept in the folder support_files as a file 
+named Output.txt. The name of this backup file can be updated by the user 
+at any point of time, by clicking the "Save to..." button under the RUN 
+section of the control panel. When the simulation gets over, the Summary 
+file is first updated, and a copy will be made on the User-given file.
+This feature is very useful if a user intends to run multiple simulation 
+procedures one after another. The "Save to.." button is pressed before 
+pressing "START" button to update the output file. 
+
+The procedure to generate each of the figures shown in the reference 
+paper is given below. Many of the figures are generated with the help
+of the Summary file. 
+
+FIGURE 1
+
+Figure one shows the spiking behavior of MSP neuron with different
+cell properties under intrinsic modulation conditions. 
+The voltage recordings (in mV) are obtained from the cell soma and 
+plotted against time in ms. 
+
+Fig 1A: (a) In control panel, 
+    > Click on Synaptic input under INPUT section
+    > Click on START button
+    The plot obtained in the graph is the required output
+
+    (b) In control panel,
+    > Click on the inKIR radio button under CELL PROPERTIES
+    > Click Synaptic input statusbutton
+    > Click on the START button
+    The plot is obtained in the graph window. 
+
+Fig 1B: (a) In control panel,
+    > Click on D1 radiobutton under DA Receptor Variant
+    > Click on radiobutton "Intrinsic" Under DA Modulation Setting
+    > Click on Synaptic input statusbutton
+    > Click on the START button
+    The plot is obtained in the graph
+
+    (b) In control panel,
+    > Select inKIR radiobutton
+    > Select D1
+    > Select Intrinsic
+    > Turn on Synaptic input
+    > START simulation
+    Plot is obtained in Graph
+
+Fig 1C: (a) Same as 1B(a), except that D2 is chosen instead of D1
+    (b) Same as 1B(b), except that D2 is chosen instead of D1
+
+
+FIGURE 2
+
+This figure shows the variation in the no on spikes per up-state
+with respect to the variations in cell properties and under intrinsic
+modulation conditions. 
+There are no subfigures, but the six points and the corresponding 
+error bar shown in the figure needs to be obtained using six separate
+simulations. As an example, the procedure to obtaine the fourth point, 
+labeled inKIR+D1 is given below:
+
+    In control panel
+    > Select inKIR
+    > Select D1
+    > Select Intrinsic DA Modulation
+    > Turn on Synaptic input
+    > Set iterations = 30 (under ACTION)
+    > Press "Save to..." button and set output file as Output2.txt
+    > Click START to start the simulation
+      (This will take some time. You may close the Graph panel 
+      to speed up the simulatio)
+
+When the message "Simulation Complete" appears in the command window,
+open the file Output1.txt. In that file under ACTION and RESULTS section,
+the mean and the s.e.m of the No. of spikes per Up-state is provided. 
+(Took me 5.5 mins to finish simulation and the values obtained are
+Mean = 3.2 and s.e.m = 0.1)
+These are the values plotted as fourth point and its error bar in Fig. 2. 
+Similarly the rest of the points can be generated. 
+
+
+FIGURE 3
+
+This is a figure derived from Fig. 2 described above. 
+
+
+FIGURE 4
+
+Fig 4A: Spike frequency vs Current Injection amplitude under intrinsic
+    dopamine modulation conditions.
+
+    For each line shown in the figure, one separate simulation
+    is needed. As an example, describing the procedure to produce 
+    the plot curresponding to non-inKIR D2.
+
+    In control panel,
+    > Select D2
+    > Select Intrinsic
+    > Select 'Range Run' radiobutton under ACTION
+    > set min = 0.21
+    > set max = 0.3
+    > set iterations = 19
+    > Press "Save to..." button and set output file as Output4a.txt
+    > Click START to start the simulation
+
+    When "Simulation Complete" message appear in the command window, 
+    open the file Output4a.txt. You can find a table showing the IC 
+    amplitude and the corresponding spike frequency. This can be 
+    plotted using plotly, python, MS Excel, Origin, or whatever 
+    plotting software you are comfortable with. 
+
+    The other lines in Fig. 4A can be produced by varying the cell
+    properties, but maintaining the settings of the INPUT section 
+    and the ACTION section unchanged.
+
+Fig 4B: Spike frequency vs input Up-state frequency under intrinsic
+    dopamine modulation conditions. 
+
+    This is similar to the procedure in Fig. 4A, but there are some 
+    changes in INPUT and ACTION section settings. Describing the
+    procedure to produce plot corresponding to non-inKIR D2. 
+    Marking (*) wherever there are changes from the procedure in 
+    Fig. 4A above
+
+    In control panel,
+    > Select D2
+    > Select Intrinsic
+    > (*) Turn on Synaptic input
+    > Select 'Range Run'
+    > (*) set min = 5
+    > (*) set max = 8.5
+    > (*) set iterations = 15
+    > Press "Save to..." button and set output file as Output4b.txt
+    > Click START (long simulation: close the graph for better speed)
+
+    When "Simulation Complete", open the Output4b.txt file, where 
+    you will find the table showing the variation of spike frequency
+    vs the input up-state frequency. Use a convenient plotting 
+    tool to visualize the plot. 
+
+
+FIGURE 5
+
+This figure is generated using a procedure exactly identical to the Fig. 2. 
+After generating the Output file through the simulation, open the file and
+observe the mean and s.e.m. of the Spike Onset Time given in the ACTION and
+RESULTS. This value represent one point in the Fig. 5, corresponding to the
+Cell Properties mentioned in the simulation. The process can be repeated 
+for different cell properties and the rest of the points can be plotted. 
+
+If the output files used to obtain Fig. 2 is available, there is no need 
+to redo the simulation to obtain Fig. 5
+
+FIGURE 6
+
+This figure is generated from the data of Fig. 5. No separate dimulation 
+needed. Thus the series of simulations conducted to generate Fig. 2 can
+produce data for preparing Figs 3, 5, and 6 as well.
+
+FIGURE 7
+
+Identical procedure as in Fig. 1 - except one setting: 
+    > Intrinsic-synaptic option is selected for dopamine modulation
+
+FIGURE 8
+
+Identical procedure as in Fig. 2 - except one setting: 
+    > Intrinsic-synaptic option is selected for dopamine modulation
+
+FIGURE 9
+
+Data from Fig. 8 is used to prepare this figure.
+
+FIGURE 10
+
+Identical procedure as in Fig. 4 - except one setting: 
+    > Intrinsic-synaptic option is selected for dopamine modulation
+
+FIGURE 11
+
+Identical procedure as in Fig. 5 - except one setting: 
+    > Intrinsic-synaptic option is selected for dopamine modulation
+

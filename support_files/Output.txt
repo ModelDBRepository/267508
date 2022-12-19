@@ -1,0 +1,23 @@
+---------------------
+Summary of Simulation
+---------------------
+
+MSN Cell Properties:
+-------------
+KIR Channel = non-inKIR
+DA Receptor = D2
+DA Modulation = Intrinsic-Synaptic
+
+Input Settings:
+-------------
+Input Type = Synaptic Stimulation
+Down-State Frequency = 3 Hz
+Up-State Frequency = 7.50 Hz
+Random seed = 0
+
+ACTION and RESULTS
+------------------
+Action = Single Run
+Spike count = 7
+Spike Instances:
+371.6	478.9	544.9	1011.7	1111.5	1590.2	1645.5	
